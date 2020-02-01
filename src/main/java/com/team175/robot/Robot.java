@@ -52,7 +52,7 @@ public class Robot extends TimedRobot {
     private final DoubleSolenoid doubleSolenoid4 = new DoubleSolenoid(6, 7);
 
     private final XboxController driverController = new XboxController(0);
-    private final XboxController operatorController = new XboxController(2);
+    private final XboxController operatorController = new XboxController(1);
 
     private final PigeonIMU gyro = new PigeonIMU(leftDriveSlave);
     private final DifferentialDrive robotDrive = new DifferentialDrive(leftDrive, rightDrive);
@@ -80,12 +80,12 @@ public class Robot extends TimedRobot {
         hook.set(ControlMode.PercentOutput, driverController.getTriggerAxis(Hand.kRight) - driverController.getTriggerAxis(Hand.kLeft));
         turret.set(ControlMode.PercentOutput, getDpadValue());
 
-        if (operatorController.getBumper(Hand.kRight)) {
+        if (driverController.getBumper(Hand.kRight)) {
             doubleSolenoid1.set(DoubleSolenoid.Value.kForward);
             doubleSolenoid2.set(DoubleSolenoid.Value.kForward);
             doubleSolenoid3.set(DoubleSolenoid.Value.kForward);
             doubleSolenoid4.set(DoubleSolenoid.Value.kForward);
-        } else if (operatorController.getBumper(Hand.kLeft)) {
+        } else if (driverController.getBumper(Hand.kLeft)) {
             doubleSolenoid1.set(DoubleSolenoid.Value.kReverse);
             doubleSolenoid2.set(DoubleSolenoid.Value.kReverse);
             doubleSolenoid3.set(DoubleSolenoid.Value.kReverse);
