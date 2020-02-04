@@ -8,20 +8,15 @@
 package com.team175.robot;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.ctre.phoenix.sensors.PigeonIMU;
 import edu.wpi.first.hal.sim.PCMSim;
-import edu.wpi.first.hal.sim.mockdata.PCMDataJNI;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
-import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
-import edu.wpi.first.wpilibj.Solenoid;
-
 
 
 /**
@@ -57,6 +52,16 @@ public class Robot extends TimedRobot {
     private final PigeonIMU gyro = new PigeonIMU(leftDriveSlave);
     private final DifferentialDrive robotDrive = new DifferentialDrive(leftDrive, rightDrive);
 
+    private boolean variable01;
+
+    boolean controlPanelStatus = false;
+    boolean previousAButton = false;
+    boolean currentAButton = false;
+
+    boolean intakeStatus = false;
+    boolean previousBButton = false;
+    boolean currentBButton = false;
+
     @Override
     public void robotInit() {
         leftDriveSlave.follow(leftDrive);
@@ -80,21 +85,63 @@ public class Robot extends TimedRobot {
         hook.set(ControlMode.PercentOutput, driverController.getTriggerAxis(Hand.kRight) - driverController.getTriggerAxis(Hand.kLeft));
         turret.set(ControlMode.PercentOutput, getDpadValue());
 
-        if (driverController.getBumper(Hand.kRight)) {
-            doubleSolenoid1.set(DoubleSolenoid.Value.kForward);
-            doubleSolenoid2.set(DoubleSolenoid.Value.kForward);
-            doubleSolenoid3.set(DoubleSolenoid.Value.kForward);
-            doubleSolenoid4.set(DoubleSolenoid.Value.kForward);
-        } else if (driverController.getBumper(Hand.kLeft)) {
-            doubleSolenoid1.set(DoubleSolenoid.Value.kReverse);
-            doubleSolenoid2.set(DoubleSolenoid.Value.kReverse);
-            doubleSolenoid3.set(DoubleSolenoid.Value.kReverse);
-            doubleSolenoid4.set(DoubleSolenoid.Value.kReverse);
+
+        /*if (driverController.getAButton()) {
+            if (variable01 == false) {
+                variable01 = true;
+            } else {
+                variable01 = false;
+            }
+
+            if (variable01 == true) {
+                doubleSolenoid1.set(DoubleSolenoid.Value.kForward);
+            } else {
+                doubleSolenoid1.set(DoubleSolenoid.Value.kReverse);
+            }
+        }*/
+
+        previousAButton = currentAButton;
+        currentAButton = driverController.getAButton();
+
+        if (currentAButton && !previousAButton) {
+            controlPanelStatus = !controlPanelStatus;
         }
 
-        System.out.println(gyro.getFusedHeading());
-    }
+        doubleSolenoid1.set(controlPanelStatus ? DoubleSolenoid.Value.kForward : DoubleSolenoid.Value.kReverse);
 
+        previousBButton = currentBButton;
+        currentBButton = driverController.getBButton();
+
+        if (currentBButton && !previousBButton) {
+            intakeStatus = !intakeStatus;
+        }
+
+        doubleSolenoid2.set(intakeStatus ? DoubleSolenoid.Value.kForward : DoubleSolenoid.Value.kReverse);
+
+
+        /*if (driverController.getXButton()) {
+            doubleSolenoid2.set(DoubleSolenoid.Value.kForward);
+        } else {
+            doubleSolenoid2.set(DoubleSolenoid.Value.kReverse);
+        }
+
+        if (driverController.getYButton()) {
+            doubleSolenoid3.set(DoubleSolenoid.Value.kForward);
+        } else {
+            doubleSolenoid3.set(DoubleSolenoid.Value.kReverse);
+        }
+
+        if (driverController.getBButton()) {
+            doubleSolenoid4.set(DoubleSolenoid.Value.kForward);
+        } else {
+            doubleSolenoid4.set(DoubleSolenoid.Value.kReverse);
+        }*/
+
+
+            System.out.println(gyro.getFusedHeading());
+
+
+    }
     private double getDpadValue() {
         int pov = operatorController.getPOV();
         double demand;
